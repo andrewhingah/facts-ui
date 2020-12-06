@@ -3,10 +3,12 @@ import React, { Component } from "react";
 import { Box, Grid, TextField as Input } from "@material-ui/core";
 import { Redirect } from "react-router-dom";
 import { toast } from "react-toastify";
+import { v4 as uuidv4 } from "uuid";
 import Button from "@material-ui/core/Button";
 import Widget from "./Widget/Widget";
 import { Typography } from "./Wrappers/Wrappers";
 import Progress from "./Progress/Progress";
+import tableData from "../tableData";
 import useStyles from "./styles";
 
 export const DetailsForm = (props) => {
@@ -104,7 +106,7 @@ export const DetailsForm = (props) => {
                   disabled={hasBlankFields}
                   onClick={props.save}
                 >
-                  Next
+                  Save
                 </Button>
               </Grid>
             </Box>
@@ -165,20 +167,25 @@ class AddCustomerDetails extends Component {
   };
 
   save = async () => {
-    const data = this.state.value;
+    const { firstName, lastName, amount, createdAt } = this.state.value;
     this.setState({
       ...this.state,
       isAddCustomerLoading: true,
     });
-    await axios
-      .post(`http://${process.env.REACT_APP_HOST}:5000/api/customers`, data)
-      .then((res) => {
-        toast.success(res.data.message, this.toastStyles);
-        this.setState({
-          ...this.state,
-          redirect: true,
-        });
-      });
+    // await axios
+    //   .post(`http://${process.env.REACT_APP_HOST}:5000/api/customers`, data)
+    //   .then((res) => {
+    //     toast.success(res.data.message, this.toastStyles);
+    //     this.setState({
+    //       ...this.state,
+    //       redirect: true,
+    //     });
+    //   });
+    tableData.push({ id: uuidv4(), firstName, lastName, amount, createdAt });
+    this.setState({
+            ...this.state,
+            redirect: true,
+          });
   };
 
   render() {

@@ -6,29 +6,32 @@ import Button from "@material-ui/core/Button";
 import Progress from "./Progress/Progress";
 import Widget from "./Widget/Widget";
 import axios from "axios";
+import tableData from "../tableData"
 
 export default function DataPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [customers, setCustomers] = useState([]);
 
   const fetchCustomers = useCallback(async () => {
-    const req = await axios.get(
-      `http://${process.env.REACT_APP_HOST}:5000/api/customers`
-    );
+    // const req = await axios.get(
+    //   `http://${process.env.REACT_APP_HOST}:5000/api/customers`
+    // );
 
-    const {
-      data: { customers },
-    } = req;
-    const tableData = customers.map((customer) => {
+    // const {
+    //   data: { customers },
+    // } = req;
+
+    // let info = JSON.stringify(tableData)
+    const tableInfo = tableData.map((customer) => {
       const item = {
         firstName: customer.firstName,
         lastName: customer.lastName,
         amount: customer.amount,
-        dateCreated: new Date(customer.createdAt).toLocaleString(),
+        dateCreated: customer.createdAt,
       };
       return item;
     });
-    const dataValues = tableData.map((obj) => {
+    const dataValues = tableInfo.map((obj) => {
       const objValues = Object.values(obj);
       return objValues;
     });
