@@ -7,7 +7,12 @@ import Widget from "./Widget/Widget";
 import axios from "axios";
 
 export default function DataPage() {
-  const customers = [];
+  const data = [
+    [ "Joe", "James", 2000, "2020-12-04"],
+    [ "John", "Andrew", 1500, "2020-12-03" ],
+    [ "Bob",  "Corp", 4520,  "2020-12-02" ],
+    [ "James",  "Test",  32, "2020-12-02" ],
+   ];
   return (
     <>
       <Grid container spacing={4}>
@@ -27,7 +32,7 @@ export default function DataPage() {
         <Grid item xs={12}>
           <MUIDataTable
             title="Data"
-            data={customers}
+            data={data}
             columns={["FIRST NAME", "LAST NAME", "AMOUNT", "DATE CREATED"]}
             options={{
               selectableRows: "none",
