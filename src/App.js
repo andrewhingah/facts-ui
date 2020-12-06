@@ -1,25 +1,35 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { HashRouter, Route, Switch, Redirect } from "react-router-dom";
+import Layout from "./components/Layout";
 
-function App() {
+export default function App() {
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <HashRouter>
+      <Switch>
+        <Route exact path="/" render={() => <Redirect to="/app/data-listing" />} />
+        <Route
+          exact
+          path="/app"
+          render={() => <Redirect to="/app/data-listing" />}
+        />
+        <PrivateRoute path="/app" component={Layout} />
+      </Switch>
+    </HashRouter>
   );
-}
 
-export default App;
+  // #######################################################################
+
+  function PrivateRoute({ component, ...rest }) {
+    return (
+      <Route
+        {...rest}
+        render={props =>
+            React.createElement(component, props)
+         
+        }
+      />
+    );
+  }
+
+}
