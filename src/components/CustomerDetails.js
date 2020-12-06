@@ -3,16 +3,49 @@ import { Link } from "react-router-dom";
 import MUIDataTable from "mui-datatables";
 import { Grid } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
+import Progress from "./Progress/Progress";
 import Widget from "./Widget/Widget";
 import axios from "axios";
 
 export default function DataPage() {
-  const data = [
-    [ "Joe", "James", 2000, "2020-12-04"],
-    [ "John", "Andrew", 1500, "2020-12-03" ],
-    [ "Bob",  "Corp", 4520,  "2020-12-02" ],
-    [ "James",  "Test",  32, "2020-12-02" ],
-   ];
+  const [isLoading, setIsLoading] = useState(false);
+  const [customers, setCustomers] = useState([]);
+
+  const fetchCustomers = useCallback(async () => {
+    const req = await axios.get(
+      `http://${process.env.REACT_APP_HOST}:5000/api/customers`
+    );
+
+    const {
+      data: { customers },
+    } = req;
+    const tableData = customers.map((customer) => {
+      const item = {
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        amount: customer.amount,
+        dateCreated: new Date(customer.createdAt).toLocaleString(),
+      };
+      return item;
+    });
+    const dataValues = tableData.map((obj) => {
+      const objValues = Object.values(obj);
+      return objValues;
+    });
+    setCustomers(dataValues);
+    setIsLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (isLoading) {
+      fetchCustomers();
+    }
+  }, [fetchCustomers, isLoading, customers]);
+
+  useEffect(() => {
+    setIsLoading(true);
+  }, []);
+
   return (
     <>
       <Grid container spacing={4}>
@@ -29,16 +62,20 @@ export default function DataPage() {
           </Widget>
         </Grid>
 
-        <Grid item xs={12}>
-          <MUIDataTable
-            title="Data"
-            data={data}
-            columns={["FIRST NAME", "LAST NAME", "AMOUNT", "DATE CREATED"]}
-            options={{
-              selectableRows: "none",
-            }}
-          />
-        </Grid>
+        {isLoading ? (
+          <Progress />
+        ) : (
+          <Grid item xs={12}>
+            <MUIDataTable
+              title="Data"
+              data={customers}
+              columns={["FIRST NAME", "LAST NAME", "AMOUNT", "DATE CREATED"]}
+              options={{
+                selectableRows: "none",
+              }}
+            />
+          </Grid>
+        )}
       </Grid>
     </>
   );

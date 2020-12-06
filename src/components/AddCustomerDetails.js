@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { Component } from "react";
 import { Box, Grid, TextField as Input } from "@material-ui/core";
 import { Redirect } from "react-router-dom";
+import { toast } from "react-toastify";
 import Button from "@material-ui/core/Button";
 import Widget from "./Widget/Widget";
 import { Typography } from "./Wrappers/Wrappers";
@@ -69,6 +70,7 @@ export const DetailsForm = (props) => {
               />
 
               <Input
+                type="number"
                 required={true}
                 label={
                   state.errors.amount && state.errors.amount.length > 0 ? (
@@ -83,19 +85,26 @@ export const DetailsForm = (props) => {
                 margin="normal"
                 variant="outlined"
                 fullWidth={true}
-                onBlur={handleChange("amount")}
+                onChange={handleChange("amount")}
                 defaultValue={state.value.amount}
                 error={state.errors.amount && state.errors.amount.length > 0}
               />
 
-              <Grid className={classes.formButtonsStart}>
+              <Grid className={classes.formButtons}>
+                <Button
+                  onClick={props.back}
+                  variant={"outlined"}
+                  color={"primary"}
+                >
+                  Back
+                </Button>
                 <Button
                   variant="contained"
                   color="primary"
                   disabled={hasBlankFields}
-                  onClick={props.continue}
+                  onClick={props.save}
                 >
-                  Save
+                  Next
                 </Button>
               </Grid>
             </Box>
@@ -107,22 +116,10 @@ export const DetailsForm = (props) => {
 };
 
 class AddCustomerDetails extends Component {
-  componentDidUpdate(prevProps, prevState) {
-    if (prevProps.isAddCustomerSuccess !== this.props.isAddCustomerSuccess) {
-      if (this.props.isAddCustomerSuccess) {
-        this.setState({
-          ...this.state,
-          redirect: true,
-        });
-      }
-    }
-  }
-
   state = {
     isAddCustomerLoading: false,
     redirect: false,
     step: 1,
-
     value: {},
     errors: {},
   };
@@ -160,17 +157,23 @@ class AddCustomerDetails extends Component {
     }
   };
 
+  back = async () => {
+    this.setState({
+      ...this.state,
+      redirect: true,
+    });
+  };
+
   save = async () => {
-    const data = this.state;
+    const data = this.state.value;
     this.setState({
       ...this.state,
       isAddCustomerLoading: true,
     });
     await axios
-      .post(`http://${process.env.REACT_APP_HOST}:8000/api/v1/customers`, {
-        data,
-      })
-      .then(() => {
+      .post(`http://${process.env.REACT_APP_HOST}:5000/api/customers`, data)
+      .then((res) => {
+        toast.success(res.data.message, this.toastStyles);
         this.setState({
           ...this.state,
           redirect: true,
@@ -181,16 +184,19 @@ class AddCustomerDetails extends Component {
   render() {
     const { isAddCustomerLoading } = this.props;
     if (this.state.redirect) {
-      return <Redirect to="/app/customers" />;
+      return <Redirect to="/app/data-listing" />;
     }
     if (isAddCustomerLoading) {
       return <Progress message="Processing details ..." />;
     }
 
     const checkIfFormValid = () => {
-      const { errors } = this.state;
+      let isFormValid = false;
+      const { value, errors } = this.state;
       const isNotEmpty = (element) => element.trim().length !== 0;
-      const isFormValid = Object.values(errors).some(isNotEmpty);
+      const hasErrors = Object.values(errors).some(isNotEmpty);
+      isFormValid =
+        value.firstName && value.lastName && value.amount && !hasErrors;
       return isFormValid;
     };
 
@@ -198,10 +204,10 @@ class AddCustomerDetails extends Component {
       <React.Fragment>
         <DetailsForm
           state={this.state}
+          back={this.back}
           save={this.save}
           handleChange={this.validate}
-          handleDateChange={this.handleDateChange}
-          hasBlankFields={!checkIfFormValid}
+          hasBlankFields={!checkIfFormValid()}
         />
       </React.Fragment>
     );
